@@ -9,12 +9,20 @@ contract HelperConfig {
         address priceFeed;
     }
 
+    NetworkConfig public activeNetworkConfig;
+
     constructor() {
         if (block.chainid == 11155111) {
             activeNetworkConfig = getSepoliaEthConfig();
-        } else if (block.chainid == 31337) {
+        } else if (block.chainid == 1) {
+            activeNetworkConfig = getMainnetEthConfig();
+        } else {
             activeNetworkConfig = getAnvilEthConfig();
         }
+    }
+
+    function getActiveNetworkConfig() public view returns (NetworkConfig memory) {
+        return activeNetworkConfig;
     }
 
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
@@ -26,8 +34,24 @@ contract HelperConfig {
 
         return sepoliaConfig;
     }
-    
-    function getAnvilEthConfig() public pure {
 
+    function getMainnetEthConfig() public pure returns (NetworkConfig memory) {
+        // Mainnet ETH/USD Address
+
+        NetworkConfig memory mainnetConfig = NetworkConfig({
+            priceFeed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+        });
+
+        return mainnetConfig;
+    }
+    
+    function getAnvilEthConfig() public pure returns (NetworkConfig memory) {
+        // Anvil ETH/USD Address
+
+        NetworkConfig memory anvilConfig = NetworkConfig({
+            priceFeed: 0x7bac85a8a1854397A6f38E99990a90674d1256eC
+        });
+
+        return anvilConfig;
     }
 }
