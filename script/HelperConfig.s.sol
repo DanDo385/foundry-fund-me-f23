@@ -2,8 +2,14 @@
 pragma solidity ^0.8.18;
 
 import {Script} from "forge-std/Script.sol";
+import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 
-contract HelperConfig {
+abstract contract CodeConstants {
+    uint8 constant DECIMALS = 8;
+    int256 constant INITIAL_PRICE = 2000e8;
+}
+
+contract HelperConfig is Script, CodeConstants {
 
     struct NetworkConfig {
         address priceFeed;
@@ -17,12 +23,22 @@ contract HelperConfig {
         } else if (block.chainid == 1) {
             activeNetworkConfig = getMainnetEthConfig();
         } else {
-            activeNetworkConfig = getAnvilEthConfig();
+            activeNetworkConfig = getOrCreateAnvilEthConfig();
         }
     }
 
     function getActiveNetworkConfig() public view returns (NetworkConfig memory) {
         return activeNetworkConfig;
+    }
+
+    function getConfigByChainId(uint256 chainId) public pure returns (NetworkConfig memory) {
+        if (chainId == 11155111) {
+            return getSepoliaEthConfig();
+        } else if (chainId == 1) {
+            return getMainnetEthConfig();
+        } else {
+            return getAnvilEthConfig();
+        }
     }
 
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
@@ -45,9 +61,23 @@ contract HelperConfig {
         return mainnetConfig;
     }
     
-    function getAnvilEthConfig() public pure returns (NetworkConfig memory) {
-        // Anvil ETH/USD Address
+    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
+        if (activeNetworkConfig.priceFeed != address(0)) {
+            return activeNetworkConfig;
+        }
 
+        vm.startBroadcast();
+        MockV3Aggregator mockV3Aggregator = new MockV3Aggregator(DECIMALS, INITIAL_PRICE);
+        vm.stopBroadcast();
+
+        NetworkConfig memory anvilConfig = NetworkConfig({
+            priceFeed: address(mockV3Aggregator)
+        });
+
+        return anvilConfig;
+    }
+
+    function getAnvilEthConfig() public pure returns (NetworkConfig memory) {
         NetworkConfig memory anvilConfig = NetworkConfig({
             priceFeed: 0x7bac85a8a1854397A6f38E99990a90674d1256eC
         });

@@ -8,12 +8,10 @@ import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 
 contract DeployFundMe is Script {
     function run() external returns (FundMe) {
-        console.log("Deployment chain ID:", block.chainid);
-        
         HelperConfig helperConfig = new HelperConfig();
-        HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig.getActiveNetworkConfig();
-        address priceFeed = activeNetworkConfig.priceFeed;
+        address priceFeed = helperConfig.getActiveNetworkConfig().priceFeed;
         
+        console.log("Deployment chain ID:", block.chainid);
         console.log("Initial price feed from config:", priceFeed);
         
         // Always deploy a mock price feed for testing
@@ -31,5 +29,29 @@ contract DeployFundMe is Script {
         console.log("Final price feed address:", priceFeed);
         
         return fundMe;
+    }
+
+    function deployFundMe() external returns (FundMe, HelperConfig) {
+        HelperConfig helperConfig = new HelperConfig();
+        address priceFeed = helperConfig.getActiveNetworkConfig().priceFeed;
+        
+        console.log("Deployment chain ID:", block.chainid);
+        console.log("Initial price feed from config:", priceFeed);
+        
+        // Always deploy a mock price feed for testing
+        vm.startBroadcast();
+        MockV3Aggregator mockPriceFeed = new MockV3Aggregator(8, 2000e8);
+        priceFeed = address(mockPriceFeed);
+        vm.stopBroadcast();
+        console.log("Using mock price feed:", priceFeed);
+        
+        vm.startBroadcast();
+        FundMe fundMe = new FundMe(priceFeed);
+        vm.stopBroadcast();
+        
+        console.log("FundMe deployed at:", address(fundMe));
+        console.log("Final price feed address:", priceFeed);
+        
+        return (fundMe, helperConfig);
     }
 } 
