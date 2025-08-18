@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.18;
 
-import {DeployFundMe} from "../script/DeployFundMe.s.sol";
-import {FundMe} from "../src/FundMe.sol";
-import {HelperConfig, CodeConstants} from "../script/HelperConfig.s.sol";
+import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
+import {FundMe} from "../../src/FundMe.sol";
+import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
-import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 
 contract FundMeTest is CodeConstants, StdCheats, Test {
     FundMe public fundMe;
@@ -62,8 +62,6 @@ contract FundMeTest is CodeConstants, StdCheats, Test {
         address funder = fundMe.getFunder(0);
         assertEq(funder, USER);
     }
-
-    // https://twitter.com/PaulRBerg/status/1624763320539525121
 
     modifier funded() {
         vm.prank(USER);
