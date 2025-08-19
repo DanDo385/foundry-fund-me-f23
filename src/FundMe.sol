@@ -58,9 +58,9 @@ contract FundMe {
         s_funders.push(msg.sender);
     }
 
-    // aderyn-ignore-next-line(centralization-risk,unused-public-function,state-change-without-event))
+   
     function withdraw() public onlyOwner {
-        // aderyn-ignore-next-line(storage-array-length-not-cached,costly-loop)
+      
         for (uint256 funderIndex = 0; funderIndex < s_funders.length; funderIndex++) {
             address funder = s_funders[funderIndex];
             s_addressToAmountFunded[funder] = 0;
